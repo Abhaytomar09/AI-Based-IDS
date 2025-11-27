@@ -1,0 +1,89 @@
+# Configuration file for IDS system
+# Copy to config/ and adjust as needed
+
+supervised:
+  model_type: "xgboost"  # or "random_forest"
+  n_estimators: 200
+  max_depth: 6
+  learning_rate: 0.1
+  subsample: 0.8
+  colsample_bytree: 0.8
+  random_state: 42
+
+unsupervised:
+  autoencoder:
+    hidden_dims: [64, 32]
+    bottleneck_dim: 16
+    activation: "relu"
+    epochs: 50
+    batch_size: 128
+    learning_rate: 0.001
+    validation_split: 0.1
+    early_stopping_patience: 5
+  
+  isolation_forest:
+    n_estimators: 100
+    contamination: 0.05
+    random_state: 42
+
+# Detection thresholds
+thresholds:
+  # Supervised model
+  supervised_confidence: 0.6      # Minimum confidence to trigger alert
+  
+  # Unsupervised model
+  anomaly_score_threshold: 2.5    # Reconstruction error threshold
+  
+  # Ensemble
+  ensemble_risk_score: 0.5        # Combined risk threshold
+
+# Weights for ensemble
+weights:
+  supervised: 0.6                 # Weight for supervised model probability
+  anomaly: 0.4                    # Weight for anomaly score
+
+# Streaming configuration
+streaming:
+  kafka_broker: "localhost:9092"
+  kafka_topic: "network_flows"
+  kafka_group_id: "ids_detector"
+  batch_size: 32
+  timeout_ms: 1000
+
+# API configuration
+api:
+  host: "0.0.0.0"
+  port: 8000
+  reload: true
+  log_level: "INFO"
+
+# Logging
+logging:
+  level: "INFO"
+  file: "logs/ids.log"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+
+# Database (for alerts storage)
+database:
+  type: "sqlite"  # or "postgresql"
+  path: "alerts.db"
+  
+# Feature engineering
+features:
+  engineer_temporal: true
+  engineer_statistical: true
+  one_hot_encode_categorical: true
+  handle_outliers: true
+  outlier_method: "iqr"
+  outlier_threshold: 1.5
+
+# Model persistence
+models:
+  save_dir: "models/"
+  xgb_path: "models/xgb_model.joblib"
+  rf_path: "models/rf_model.joblib"
+  ae_path: "models/autoencoder.pth"
+  if_path: "models/isolation_forest.joblib"
+  scaler_path: "models/scaler.joblib"
+  feature_names_path: "models/feature_names.json"
